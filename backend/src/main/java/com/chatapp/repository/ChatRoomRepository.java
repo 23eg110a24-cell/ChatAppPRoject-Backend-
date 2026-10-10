@@ -12,10 +12,16 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     Optional<ChatRoom> findByDirectKey(String directKey);
 
+    /**
+     * Every room the user belongs to, with the complete member list. The membership test is a
+     * subquery so it does not filter the fetched collection down to just the viewer.
+     */
     @Query("""
             select distinct r from ChatRoom r
-            join fetch r.members m
-            where m.id = :userId
+            join fetch r.members
+            where r.id in (
+                select r2.id from ChatRoom r2 join r2.members m2 where m2.id = :userId
+            )
             """)
     List<ChatRoom> findAllForMember(@Param("userId") Long userId);
 
