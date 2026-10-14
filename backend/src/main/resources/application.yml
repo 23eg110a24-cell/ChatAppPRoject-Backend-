@@ -19,7 +19,7 @@ spring:
 
   h2:
     console:
-      enabled: true
+      enabled: ${H2_CONSOLE_ENABLED:false}
       path: /h2-console
   web:
     error:
@@ -34,10 +34,7 @@ chatapp:
     expiration-minutes: 1440
     issuer: chatapp
   cors:
-    allowed-origins:
-      - http://localhost:5173
-      - http://127.0.0.1:5173
-      - http://localhost:4173
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173}
   seed-demo-data: true
 
 logging:
