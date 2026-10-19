@@ -55,3 +55,9 @@ export function roomInitials(room) {
   const partner = partnerOf(room);
   return partner ? partner.initials : '??';
 }
+
+// Profile picture of the other person in a direct message; channels have none.
+export function roomAvatarUrl(room) {
+  const partner = partnerOf(room);
+  return partner ? partner.avatarUrl || null : null;
+}

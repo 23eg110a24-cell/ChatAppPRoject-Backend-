@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import Avatar from './Avatar';
-import { formatRowTime, isChannel, partnerOf, roomInitials, roomTitle } from '../utils';
+import { formatRowTime, isChannel, partnerOf, roomAvatarUrl, roomInitials, roomTitle } from '../utils';
 
 function RoomRow({ room, active, online, onSelect }) {
   const partner = partnerOf(room);
   const status = isChannel(room) ? undefined : partner ? online.has(partner.id) : false;
   return (
     <button type="button" className={active ? 'row row-on' : 'row'} onClick={() => onSelect(room.id)}>
-      <Avatar initials={roomInitials(room)} online={status} />
+      <Avatar initials={roomInitials(room)} src={roomAvatarUrl(room)} online={status} />
       <span className="row-body">
         <span className="row-top">
           <span className="row-title">{roomTitle(room)}</span>
@@ -19,7 +19,7 @@ function RoomRow({ room, active, online, onSelect }) {
   );
 }
 
-export default function Sidebar({ me, rooms, activeId, online, onSelect, onNewChat, onLogout }) {
+export default function Sidebar({ me, rooms, activeId, online, onSelect, onNewChat, onLogout, onOpenProfile }) {
   const [query, setQuery] = useState('');
 
   const term = query.trim().toLowerCase();
@@ -30,11 +30,16 @@ export default function Sidebar({ me, rooms, activeId, online, onSelect, onNewCh
   return (
     <aside className="sidebar">
       <div className="me">
-        <Avatar initials={me.initials} online={true} />
+        <button type="button" className="avatar-btn" onClick={() => onOpenProfile(me)} title="Edit profile">
+          <Avatar initials={me.initials} src={me.avatarUrl} online={true} />
+        </button>
         <span className="me-text">
           <span className="me-name">{me.displayName || me.username}</span>
           <span className="muted small">@{me.username}</span>
         </span>
+        <button type="button" className="btn btn-ghost" onClick={() => onOpenProfile(me)}>
+          Profile
+        </button>
         <button type="button" className="btn btn-ghost" onClick={onLogout}>
           Sign out
         </button>

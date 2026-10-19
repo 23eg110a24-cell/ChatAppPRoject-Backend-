@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Avatar from './Avatar';
-import { formatTime, isChannel, partnerOf, roomInitials, roomTitle } from '../utils';
+import { formatTime, isChannel, partnerOf, roomAvatarUrl, roomInitials, roomTitle } from '../utils';
 
 function subtitleFor(room, online) {
   if (isChannel(room)) {
@@ -29,6 +29,7 @@ export default function ChatPane({
   onTyping,
   onLoadOlder,
   onBack,
+  onOpenProfile,
 }) {
   const [text, setText] = useState('');
   const listRef = useRef(null);
@@ -100,7 +101,13 @@ export default function ChatPane({
         <button type="button" className="btn btn-ghost back" onClick={onBack}>
           Back
         </button>
-        <Avatar initials={roomInitials(room)} online={status} />
+        {partner ? (
+          <button type="button" className="avatar-btn" onClick={() => onOpenProfile(partner)} title="View profile">
+            <Avatar initials={roomInitials(room)} src={roomAvatarUrl(room)} online={status} />
+          </button>
+        ) : (
+          <Avatar initials={roomInitials(room)} online={status} />
+        )}
         <span className="chat-head-text">
           <span className="chat-title">{roomTitle(room)}</span>
           <span className="muted small">
@@ -134,11 +141,37 @@ export default function ChatPane({
           const previous = items[index - 1];
           const showName =
             isChannel(room) && !mine && (!previous || !previous.sender || previous.sender.id !== message.sender.id);
-          return (
-            <div key={message.id} className={mine ? 'msg msg-me' : 'msg'}>
+          const next = items[index + 1];
+          const lastOfRun = !next || !next.sender || next.sender.id !== message.sender.id;
+          const content = (
+            <>
               {showName && <span className="msg-name">{message.sender.displayName || message.sender.username}</span>}
               <div className="bubble">{message.content}</div>
               <span className="msg-time">{formatTime(message.createdAt)}</span>
+            </>
+          );
+          if (mine) {
+            return (
+              <div key={message.id} className="msg msg-me">
+                {content}
+              </div>
+            );
+          }
+          return (
+            <div key={message.id} className="msg-line">
+              {lastOfRun ? (
+                <button
+                  type="button"
+                  className="avatar-btn"
+                  onClick={() => onOpenProfile(message.sender)}
+                  title="View profile"
+                >
+                  <Avatar initials={message.sender.initials} src={message.sender.avatarUrl} size={28} />
+                </button>
+              ) : (
+                <span className="avatar-gap" />
+              )}
+              <div className="msg">{content}</div>
             </div>
           );
         })}

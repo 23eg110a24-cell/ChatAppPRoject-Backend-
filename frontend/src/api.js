@@ -5,6 +5,12 @@ const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/
 // ws:// or wss:// URL of the STOMP endpoint, derived from the REST base URL.
 export const WS_URL = BASE.replace(/^http/, 'ws') + '/ws';
 
+// Turns a path like /uploads/ab12.gif (avatar / banner) into a full URL on the backend.
+export function assetUrl(path) {
+  if (!path) return null;
+  return /^https?:\/\//.test(path) ? path : BASE + path;
+}
+
 const TOKEN_KEY = 'chatapp.token';
 
 let token = null;
@@ -34,19 +40,20 @@ export function onUnauthorized(handler) {
   unauthorizedHandler = handler;
 }
 
-async function request(path, { method = 'GET', body } = {}) {
+// body = JSON payload, form = FormData (file uploads; the browser sets the content type itself)
+async function request(path, { method = 'GET', body, form } = {}) {
   const headers = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   const current = getToken();
   if (current) headers.Authorization = `Bearer ${current}`;
 
+  let payload;
+  if (form !== undefined) payload = form;
+  else if (body !== undefined) payload = JSON.stringify(body);
+
   let response;
   try {
-    response = await fetch(BASE + path, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    response = await fetch(BASE + path, { method, headers, body: payload });
   } catch {
     throw Object.assign(new Error('Cannot reach the server. Is the backend running?'), { status: 0 });
   }
@@ -68,6 +75,12 @@ async function request(path, { method = 'GET', body } = {}) {
   return data;
 }
 
+function upload(path, file) {
+  const form = new FormData();
+  form.append('file', file);
+  return request(path, { method: 'POST', form });
+}
+
 export const api = {
   login: (usernameOrEmail, password) =>
     request('/api/auth/login', { method: 'POST', body: { usernameOrEmail, password } }),
@@ -77,6 +90,10 @@ export const api = {
       body: { username, email, password, displayName: displayName || null },
     }),
   me: () => request('/api/users/me'),
+  uploadAvatar: (file) => upload('/api/users/me/avatar', file),
+  removeAvatar: () => request('/api/users/me/avatar', { method: 'DELETE' }),
+  uploadBanner: (file) => upload('/api/users/me/banner', file),
+  removeBanner: () => request('/api/users/me/banner', { method: 'DELETE' }),
   users: (q) => request(`/api/users?q=${encodeURIComponent(q || '')}`),
   presence: () => request('/api/presence'),
   rooms: () => request('/api/rooms'),

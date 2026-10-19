@@ -5,12 +5,13 @@ import { sortRooms } from '../utils';
 import Sidebar from './Sidebar';
 import ChatPane from './ChatPane';
 import NewChatModal from './NewChatModal';
+import ProfileModal from './ProfileModal';
 
 const PAGE_SIZE = 50;
 const TYPING_TTL_MS = 4000;
 const ROOM_POLL_MS = 10000;
 
-export default function Chat({ me, onLogout }) {
+export default function Chat({ me, onLogout, onMeChange }) {
   const [rooms, setRooms] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [messages, setMessages] = useState({}); // roomId -> { items, loaded, hasMore }
@@ -19,6 +20,7 @@ export default function Chat({ me, onLogout }) {
   const [showNew, setShowNew] = useState(false);
   const [connected, setConnected] = useState(false);
   const [notice, setNotice] = useState('');
+  const [profileUser, setProfileUser] = useState(null);
 
   const clientRef = useRef(null);
   const subsRef = useRef(new Map()); // roomId -> [messageSub, typingSub]
@@ -336,6 +338,7 @@ export default function Chat({ me, onLogout }) {
         onSelect={selectRoom}
         onNewChat={() => setShowNew(true)}
         onLogout={onLogout}
+        onOpenProfile={setProfileUser}
       />
 
       {activeRoom ? (
@@ -351,6 +354,7 @@ export default function Chat({ me, onLogout }) {
           onTyping={sendTyping}
           onLoadOlder={loadOlder}
           onBack={() => setActiveId(null)}
+          onOpenProfile={setProfileUser}
         />
       ) : (
         <section className="chat chat-empty">
@@ -365,6 +369,16 @@ export default function Chat({ me, onLogout }) {
           onClose={() => setShowNew(false)}
           onOpenDirect={openDirect}
           onOpenRoom={openRoom}
+        />
+      )}
+
+      {profileUser && (
+        <ProfileModal
+          user={profileUser.id === me.id ? me : profileUser}
+          editable={profileUser.id === me.id}
+          online={profileUser.id === me.id || online.has(profileUser.id)}
+          onClose={() => setProfileUser(null)}
+          onChange={onMeChange}
         />
       )}
 

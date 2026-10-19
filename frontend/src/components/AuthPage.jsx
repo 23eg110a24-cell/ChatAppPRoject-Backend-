@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { api } from '../api';
 
-export default function AuthPage({ onAuth }) {
-  const [mode, setMode] = useState('login');
+export default function AuthPage({ onAuth, initialMode = 'login' }) {
+  const [mode, setMode] = useState(initialMode);
   const [form, setForm] = useState({
     usernameOrEmail: '',
     username: '',
