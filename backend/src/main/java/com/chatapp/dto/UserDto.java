@@ -14,6 +14,8 @@ public record UserDto(
         String avatarColor,
         String initials,
         String bio,
+        String avatarUrl,
+        String bannerUrl,
         boolean online,
         Instant lastSeenAt
 ) {
@@ -30,6 +32,8 @@ public record UserDto(
                 user.getAvatarColor(),
                 user.getInitials(),
                 user.getBio(),
+                user.getAvatarUrl(),
+                user.getBannerUrl(),
                 online,
                 user.getLastSeenAt());
     }

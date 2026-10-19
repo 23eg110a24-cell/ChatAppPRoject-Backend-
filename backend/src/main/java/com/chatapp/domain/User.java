@@ -40,6 +40,14 @@ public class User {
     @Column(length = 280)
     private String bio;
 
+    /** URL path of the uploaded profile picture (png, jpg, webp or gif), e.g. /uploads/ab12.gif. */
+    @Column(length = 255)
+    private String avatarUrl;
+
+    /** URL path of the uploaded profile banner (png, jpg, webp or gif). */
+    @Column(length = 255)
+    private String bannerUrl;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -109,6 +117,22 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public void setBannerUrl(String bannerUrl) {
+        this.bannerUrl = bannerUrl;
     }
 
     public Instant getCreatedAt() {
